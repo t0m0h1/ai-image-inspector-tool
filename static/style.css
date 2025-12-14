@@ -33,6 +33,38 @@ body {
    Layout
    ========================= */
 
+
+   .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #333;
+}
+
+.navbar a {
+    color: #ffffff;
+    text-decoration: none;
+    margin-left: 1rem;
+    font-weight: 500;
+}
+
+.navbar a:hover {
+    color: #4da3ff;
+}
+
+.brand {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+
 header {
     background-color: var(--bg-panel);
     padding: 1.25rem;

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 import os
+
 from utils.exif_utils import extract_exif
 from utils.vision_utils import analyse_image
 from utils.insight_engine import generate_insights
@@ -11,22 +12,34 @@ ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# Makes directory for uploads if it doesn't exist
+# Ensure upload directory exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
 
+
+# -----------------------
+# Routes
+# -----------------------
 
 @app.route("/")
 def index():
+    """
+    Main UI page (JS-driven)
+    """
     return render_template("index.html")
-
 
 
 @app.route("/api/upload", methods=["POST"])
 def upload_image():
+    """
+    Uploads an image and returns analysis results as JSON
+    """
     if "image" not in request.files:
         return jsonify({"error": "No image provided"}), 400
 
@@ -41,22 +54,42 @@ def upload_image():
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
     file.save(filepath)
 
-    # Extract metadata
+    # ---- AI Pipeline ----
     exif_data = extract_exif(filepath)
-
-    # Analyse image (AI / CV)
     detections = analyse_image(filepath)
-
-    # Generate insights
     insights = generate_insights(detections, exif_data)
 
     return jsonify({
+        "success": True,
         "filename": file.filename,
+        "image_url": f"/static/uploads/{file.filename}",
         "exif": exif_data,
         "detections": detections,
         "insights": insights
     })
 
+
+@app.route("/api/delete/<filename>", methods=["DELETE"])
+def delete_image(filename):
+    """
+    Deletes an uploaded image (API endpoint)
+    """
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+    if not os.path.exists(filepath):
+        return jsonify({"error": "File not found"}), 404
+
+    os.remove(filepath)
+
+    return jsonify({
+        "success": True,
+        "message": "Image deleted successfully"
+    })
+
+
+# -----------------------
+# App Entry Point
+# -----------------------
 
 if __name__ == "__main__":
     app.run(debug=True)

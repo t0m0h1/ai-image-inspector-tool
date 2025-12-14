@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Results</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+{% include "_navbar.html" %}
+
+<main>
+    <h2>Analysis Results</h2>
+
+    <div class="panel">
+        <img src="{{ image_url }}" style="max-width:100%; border-radius:6px;">
+    </div>
+
+    <div class="panel">
+        <h3>Insights</h3>
+        {% for insight in insights %}
+            <div class="insight">{{ insight }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="panel">
+        <h3>Actions</h3>
+        <a href="/" class="button">⬅ Upload Another Image</a>
+
+        <form action="/api/delete/{{ filename }}" method="post" style="display:inline;">
+            <button class="danger" onclick="return confirm('Delete this image?')">
+                🗑 Delete Image
+            </button>
+        </form>
+    </div>
+</main>
+
+</body>
+</html>

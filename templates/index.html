@@ -7,11 +7,59 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
+    {% include "navbar.html" %}
+
     <h1>Welcome to the AI Image Inspector Tool</h1>
-    <h2>Upload Image</h2>
-    <form action="/api/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="image" required>
-        <button type="submit">Upload</button>
-    </form>
+
+    <!-- Upload Section -->
+    <section id="uploadSection">
+        <h2>Upload Image</h2>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Upload</button>
+        </form>
+    </section>
+
+    <!-- Results Section -->
+    <section id="resultsSection" style="display:none;">
+        <button id="backBtn">← Back</button>
+        <pre id="output"></pre>
+    </section>
+
+    <!-- JavaScript -->
+    <script>
+        const form = document.getElementById("uploadForm");
+        const output = document.getElementById("output");
+        const backBtn = document.getElementById("backBtn");
+        const uploadSection = document.getElementById("uploadSection");
+        const resultsSection = document.getElementById("resultsSection");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault(); // stop navigation
+
+            const formData = new FormData(form);
+
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+
+            output.textContent = JSON.stringify(data, null, 2);
+
+            uploadSection.style.display = "none";
+            resultsSection.style.display = "block";
+        });
+
+        backBtn.addEventListener("click", () => {
+            resultsSection.style.display = "none";
+            uploadSection.style.display = "block";
+            form.reset();
+        });
+    </script>
+
 </body>
 </html>
